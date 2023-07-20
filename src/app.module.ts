@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { BlogModule } from './blog/blog.module';
 
 
 @Module({
@@ -20,8 +21,6 @@ import { ConfigModule } from '@nestjs/config';
     // username: process.env.DB_USERNAME,
     // password: process.env.DB_PASSWORD,
     // database: process.env.DB_DATABASE,
-    // autoLoadEntities: true,
-    // synchronize: true
     host: 'localhost',
     port: 5434,
     username: 'postgres',
@@ -29,12 +28,14 @@ import { ConfigModule } from '@nestjs/config';
     database: 'easyoneDb',
     autoLoadEntities: true,
     synchronize: true
+    // autoLoadEntities: true,
+    // synchronize: true
   }), 
     ConfigModule.forRoot({
       isGlobal: true,
     }),
     UserModule, 
-    AuthModule 
+    AuthModule, BlogModule 
   ],
   controllers: [AppController,],
   providers: [AppService],

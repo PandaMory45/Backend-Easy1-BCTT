@@ -41,8 +41,6 @@ export class UserController {
   async ChangePassword(@Req() req: RequestUser, @Body() changePasswordDto: ChangePasswordDto): Promise<void>{
     console.log(req)  
     const user = req.user;
-      // console.log(user)
-      // console.log(changePasswordDto)
       await this.userService.ChangePassword(user, changePasswordDto)
   }
 

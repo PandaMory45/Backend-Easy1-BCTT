@@ -13,6 +13,7 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
     private readonly authService: AuthService,
    ){}
+   
   //register account by User
   async register(user: User): Promise<User> {
     try {
@@ -34,7 +35,10 @@ export class UserService {
   }
 
   async findOne(id: number): Promise<User> {
-    return await this.userRepository.findOne({where:{id: id}})
+    return await this.userRepository.findOne({
+      where:{id: id},
+      relations: ['blogEntries']
+    })
   }
 
   async findAll(): Promise<User[]> {

@@ -1,6 +1,8 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import * as bcrypt from 'bcrypt';
 import { User, UserRole } from "../dto/user.dto";
+import { BlogDto } from "src/blog/dto/blog.dto";
+import { BlogEntryEntity } from "src/blog/entites/blog.entity";
 
 @Entity()
 export class UserEntity{
@@ -22,10 +24,15 @@ export class UserEntity{
   @Column()
   password: string
 
+  @OneToMany(type => BlogEntryEntity, blogEntryEntity => blogEntryEntity.author)
+  blogEntries: BlogEntryEntity[];
+  
   @BeforeInsert()
   emaiToLowerCase(){
     this.email = this.email.toLowerCase()
   }
+
+
 
   // @BeforeInsert()
   // async hashPassword() {
