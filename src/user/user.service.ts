@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { ChangePasswordDto, UserEntity } from './entities/user.entity';
+import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, UserRole } from './dto/user.dto';
+import { ChangePasswordDto, FilterDto, QueryDto, User, UserRole } from './dto/user.dto';
 import { AuthService } from 'src/auth/auth.service';
-import { error } from 'console';
+import { join } from 'path';
+
 
 @Injectable()
 export class UserService {
@@ -13,36 +14,21 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
     private readonly authService: AuthService,
    ){}
-   
-  //register account by User
-  async register(user: User): Promise<User> {
-    try {
-      user.role = UserRole.USER;
-      const newUser = new UserEntity();
-      newUser.name = user.name;
-      newUser.username = user.username;
-      newUser.email = user.email;
-      newUser.password = await this.authService.hashPassword(user.password);
-      newUser.role = user.role
-      // console.log(newUser.password)
-      const savedUser = await this.userRepository.save(newUser);
-      delete(savedUser.password)
-      // return await this.converToJwtString(user.id, user.email);
-      return savedUser
-    } catch(err) {
-      throw err
-    }
-  }
+  
 
   async findOne(id: number): Promise<User> {
-    return await this.userRepository.findOne({
+    const user =  await this.userRepository.findOne({
       where:{id: id},
       relations: ['blogEntries']
     })
+    const {password, ...result} = user
+    return result;
   }
 
   async findAll(): Promise<User[]> {
-    return await this.userRepository.find()
+    const users = await this.userRepository.find()
+    users.forEach(function (v) {delete v.password})
+    return users
   }
 
   async deletOne(id: number): Promise<any> {
@@ -71,4 +57,48 @@ export class UserService {
     await this.userRepository.save(user)
     return 'Đổi mật khẩu thành công'
   }
+  
+  // async getUsers(filterDto: FilterDto): Promise<User[]> {
+  //   const { username, search } = filterDto;
+
+  //   let users = await this.userRepository.find();
+
+  //   if (username) {
+  //     users = users.filter((user) => user.username === username);
+  //   }
+
+  //   if (search) {
+  //     users = users.filter(
+  //       (user) =>
+  //         user.username.includes(search) || user.name.includes(search),
+  //     );
+  //   }
+
+  //   return users;
+  // }
+
+  async getUsers(filterDto: FilterDto): Promise<User[]> {
+    const { username, search } = filterDto;
+  
+    // Create a query builder for the User entity
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+  
+    // If username is provided, perform a partial search
+    if (username) {
+      queryBuilder.andWhere('user.username LIKE :username', { username: `%${username}%` });
+    }
+  
+    // If search is provided, perform a partial search on multiple columns (e.g., username, name)
+    if (search) {
+      queryBuilder.andWhere(
+        '(user.username LIKE :search OR user.name LIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+  
+  // Execute the query and return the results
+    const users = await queryBuilder.getMany();
+    return users;
+  }
+
 }

@@ -8,20 +8,12 @@ import { UserEntity } from 'src/user/entities/user.entity';
 import { RolesGuard } from './roles.guard';
 import { JwtAuthGuard } from './jwt.guard';
 import { UserModule } from 'src/user/user.module';
+import { User } from 'src/user/dto/user.dto';
 
 @Module({
   imports:[
     TypeOrmModule.forFeature([UserEntity]),
     forwardRef(() => UserModule),
-    // ConfigModule.forRoot(),
-    // JwtModule.registerAsync({
-    //   imports: [ConfigModule],
-    //   inject: [ConfigService],
-    //   useFactory: async (config: ConfigService) => ({
-    //     secret: config.get<string>('SECRET_KEY'),
-    //     signOptions: {  expiresIn: '100s' },
-    //   }),
-    // }),
     JwtModule.register({}),
   ],
   controllers:[AuthController],

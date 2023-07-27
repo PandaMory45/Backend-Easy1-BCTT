@@ -1,6 +1,9 @@
 // import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from "@nestjs/swagger";
+import { CategoryEntity} from "src/category/entities/category.entity";
+import { CompanyEntity } from "src/company/entities/company.entity";
 import { UserEntity } from "src/user/entities/user.entity";
-import { Entity, PrimaryGeneratedColumn, Column, BeforeUpdate, ManyToOne } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, BeforeUpdate, ManyToOne, ManyToMany } from "typeorm";
 
 
 
@@ -13,7 +16,7 @@ export class BlogEntryEntity {
     @Column()
     title: string;
 
-    @Column()
+    @Column({nullable: true})
     slug: string;
 
     @Column({default: ''})
@@ -32,10 +35,15 @@ export class BlogEntryEntity {
     updateTimestamp() {
         this.updatedAt = new Date;
     }
+    @Column({default: 0})
+    views: number;
 
     @Column({default: 0})
-    likes: number;
+    upVote: number;
 
+    @Column({default: 0})
+    downvote: number;
+ 
     @Column({nullable: true})
     headerImage: string;
 
@@ -45,6 +53,15 @@ export class BlogEntryEntity {
     @Column({nullable: true})
     isPublished: boolean;
 
+    @ApiProperty()
     @ManyToOne(type => UserEntity, user => user.blogEntries)
     author: UserEntity;
+
+    @ApiProperty()
+    @ManyToOne(type => CategoryEntity, category => category.blogEntries, {nullable: true, onDelete: 'SET NULL'})
+    category: CategoryEntity
+
+    @ApiProperty()
+    @ManyToMany(() => CompanyEntity, company => company.blogEntries, {nullable: true, onDelete: 'SET NULL'})
+    company: CompanyEntity[];
 }

@@ -10,6 +10,9 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { BlogModule } from './blog/blog.module';
+import { CategoryModule } from './category/category.module';
+import { CompanyModule } from './company/company.module';
+import { MediaModule } from './media/media.module';
 
 
 @Module({
@@ -35,7 +38,7 @@ import { BlogModule } from './blog/blog.module';
       isGlobal: true,
     }),
     UserModule, 
-    AuthModule, BlogModule 
+    AuthModule, BlogModule, CategoryModule, CompanyModule, MediaModule 
   ],
   controllers: [AppController,],
   providers: [AppService],

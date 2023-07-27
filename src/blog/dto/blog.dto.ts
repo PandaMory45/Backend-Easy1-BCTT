@@ -1,29 +1,58 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { CreateCategoryDto } from "src/category/dto/category.dto";
 import { User } from "src/user/dto/user.dto";
 
 export class BlogDto{
-  
-  id?: number;
-
-  @IsNotEmpty({ message: 'Password không để trống!' })
+  @ApiProperty({ example: 'Khai trương' })
+  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   title?: string;
   
+  @ApiProperty({ example: 'khai-truong' })
+  @IsOptional()
   @IsString()
+  @IsNotEmpty()
   slug?: string;
 
-  @IsNotEmpty({ message: 'Password không để trống!' })
+  @ApiProperty({ example: 'Khai trương hồng phát' })
+  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   description?: string;
 
-  @IsNotEmpty({ message: 'Password không để trống!' })
+  @ApiProperty({ example: 'Khai trương hồng phát'  })
+  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   body?: string;
-  createAt?: Date;
-  updateAt?: Date;
-  likes?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  views?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  upVote?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  downVote?:number;
+
+  @ApiProperty()
+  @IsOptional()
   author?: User;
-  headerImage?: string;
-  publishedDate?: Date;
+  
+  @ApiProperty()
+  @IsOptional()
   isPublished?: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  category?: CreateCategoryDto;
+  
+  @ApiProperty()
+  @IsOptional()
+  headerImage?: string;
 }

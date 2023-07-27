@@ -3,6 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { User, UserRole } from "../dto/user.dto";
 import { BlogDto } from "src/blog/dto/blog.dto";
 import { BlogEntryEntity } from "src/blog/entites/blog.entity";
+import { ApiProperty } from "@nestjs/swagger";
 
 @Entity()
 export class UserEntity{
@@ -15,18 +16,26 @@ export class UserEntity{
   @Column({unique: true})
   username: string;
 
+  @ApiProperty()
   @Column({type: 'enum', enum: UserRole, default: UserRole.USER})
   role: UserRole
 
   @Column()
   email: string
 
-  @Column()
+  @Column({ select: false })
   password: string
 
+  @ApiProperty()
   @OneToMany(type => BlogEntryEntity, blogEntryEntity => blogEntryEntity.author)
   blogEntries: BlogEntryEntity[];
   
+  @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
+  createdAt: Date;
+
+  @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
+  updatedAt: Date;    
+
   @BeforeInsert()
   emaiToLowerCase(){
     this.email = this.email.toLowerCase()
@@ -44,21 +53,3 @@ export class UserEntity{
   //   return await bcrypt.compare(password, this.password);
   // }
 }
-export class LoginAuthDto extends UserEntity{
-  @Column()
-  email: string
-
-  @Column()
-  password: string
-}
-export class ChangePasswordDto extends UserEntity{
-  @Column()
-  oldPassword: string
-  
-  @Column()
-  newPassword: string
-
-  @Column()
-  recentPassword: string
-}
-export type RequestUser = Request & { user: User };

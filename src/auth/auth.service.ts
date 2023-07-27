@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/user/dto/user.dto';
-import { LoginAuthDto, UserEntity } from 'src/user/entities/user.entity';
+import { async } from 'rxjs';
+import { LoginAuthDto, RegisterUser, User, UserRole } from 'src/user/dto/user.dto';
+import { UserEntity } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 const bcrypt = require('bcrypt')
 @Injectable()
@@ -25,8 +26,27 @@ export class AuthService {
   }
 
   //create User by Admin
-  async createUser(user: User): Promise<object> {
+  async createUser(user: RegisterUser): Promise<User> {
     try {
+      const newUser = new UserEntity();
+      newUser.name = user.name;
+      newUser.username = user.username;
+      newUser.email = user.email;
+      newUser.password = await this.hashPassword(user.password);
+      newUser.role = user.role
+      // console.log(newUser.password)
+      const savedUser = await this.userRepository.save(newUser);
+      delete(savedUser.password)
+      // return await this.converToJwtString(user.id, user.email);
+      return savedUser
+    } catch(err) {
+      throw err
+    }
+  }
+
+  async registerUser(user: RegisterUser): Promise<User> {
+    try {
+      user.role = UserRole.USER;
       const newUser = new UserEntity();
       newUser.name = user.name;
       newUser.username = user.username;
@@ -49,7 +69,15 @@ export class AuthService {
 
   async login(loginAuthDto: LoginAuthDto): Promise<object>{
     const { email, password } = loginAuthDto;
-    const  user = await this.userRepository.findOne({where:{email: email}});
+    const  user = await this.userRepository.findOne({
+      where:{email: email},
+      select: [
+        'id',
+        'email',
+        'role',
+        'name',
+        'username',
+        'password']});
     if(!user){
       return {err: 'Email hoặc mật khẩu sai'}
     }

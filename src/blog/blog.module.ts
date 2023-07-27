@@ -6,10 +6,11 @@ import { AuthModule } from 'src/auth/auth.module';
 import { UserModule } from 'src/user/user.module';
 import { BlogEntryEntity } from './entites/blog.entity';
 import { UserIsAuthor } from './guard/user-is-author.guard';
+import { CategoryEntity } from 'src/category/entities/category.entity';
 
 @Module({
   imports:[
-    TypeOrmModule.forFeature([BlogEntryEntity]),
+    TypeOrmModule.forFeature([BlogEntryEntity, CategoryEntity]),
     AuthModule,
     UserModule
   ],
