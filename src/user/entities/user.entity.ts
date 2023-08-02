@@ -4,6 +4,7 @@ import { User, UserRole } from "../dto/user.dto";
 import { BlogDto } from "src/blog/dto/blog.dto";
 import { BlogEntryEntity } from "src/blog/entites/blog.entity";
 import { ApiProperty } from "@nestjs/swagger";
+import { MediaEntity } from "src/media/entities/media.entity";
 
 @Entity()
 export class UserEntity{
@@ -18,10 +19,13 @@ export class UserEntity{
 
   @ApiProperty()
   @Column({type: 'enum', enum: UserRole, default: UserRole.USER})
-  role: UserRole
+  role: UserRole;
 
   @Column()
-  email: string
+  email: string;
+
+  @Column({ nullable: true, default: null })
+  avatar: string;
 
   @Column({ select: false })
   password: string
@@ -34,13 +38,17 @@ export class UserEntity{
   createdAt: Date;
 
   @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
-  updatedAt: Date;    
+  updatedAt: Date;  
+  
+  @OneToMany(() => MediaEntity, media => media.user, {nullable: true, onDelete: 'SET NULL'})
+  media: MediaEntity[];
 
   @BeforeInsert()
   emaiToLowerCase(){
-    this.email = this.email.toLowerCase()
+    this.email = this.email.toLowerCase();
   }
 
+  
 
 
   // @BeforeInsert()

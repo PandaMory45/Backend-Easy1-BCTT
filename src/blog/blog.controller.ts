@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { BlogDto } from './dto/blog.dto';
+import { BlogDto, FilterBlogDto } from './dto/blog.dto';
 import { BlogService } from './blog.service';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { AuthGuard } from '@nestjs/passport';
@@ -24,14 +24,12 @@ export class BlogController {
       return this.blogService.create(user, blogEntry);
   }
 
-  // @Get()
-  // findBlogEntries(@Query('userId') userId: number): Promise<BlogDto[]>{
-  //   if(userId == null){
-  //     return this.blogService.findAll();
-  //   } else {
-  //     return this.blogService.findByUser(userId)
-  //   }
-  // }
+  @Get('/search')
+  findBlogEntries(@Query('') filterDto: FilterBlogDto): Promise<BlogDto[]>{
+    return this.blogService.getBlogEnties(filterDto)
+
+  }
+
   @ApiOperation({ summary: 'Paginate Search all Post' })
   @Get('')
   index(
@@ -76,6 +74,5 @@ export class BlogController {
   deleteOne(@Param('id') id: number): Promise<any>{
     return this.blogService.deleteOne(id)
   }
-
 
 }

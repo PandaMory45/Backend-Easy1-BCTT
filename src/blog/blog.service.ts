@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlogEntryEntity } from './entites/blog.entity';
 import { Repository } from 'typeorm';
-import { BlogDto } from './dto/blog.dto';
+import { BlogDto, FilterBlogDto } from './dto/blog.dto';
 import { User } from 'src/user/dto/user.dto';
 import { IPaginationOptions, paginate, Pagination } from 'nestjs-typeorm-paginate';
 import { CategoryService } from 'src/category/category.service';
@@ -38,6 +38,33 @@ export class BlogService {
 
   async findOne(id: number): Promise<BlogDto>{
     return await this.blogRepository.findOne({where:{id: id}, relations: ['author', 'category'],})
+  }
+
+  async getBlogEnties(filter: FilterBlogDto):Promise<BlogEntryEntity[]>{
+    const { title, search, createAt } = filter;
+  
+    const queryBuilder = this.blogRepository
+      .createQueryBuilder('blog_entry')
+      .leftJoinAndSelect('blog_entry.category', 'category')
+      .leftJoinAndSelect('blog_entry.author', 'author')
+    
+    if (title) {
+      queryBuilder.andWhere('blog_entry.title LIKE :title', { title: `%${title}%` });
+    }
+    if(createAt){
+      queryBuilder.andWhere('DATE(blog_entry.createAt) = DATE(:createAt)', {
+        createAt,
+      });
+    }
+    if (search) {
+      queryBuilder.andWhere(
+        '(blog_entry.description LIKE :search OR category.name LIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    const blogs = await queryBuilder.getMany();
+    return blogs;
   }
 
   async findByUser(userId: any): Promise<BlogDto[]>{

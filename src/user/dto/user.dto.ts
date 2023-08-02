@@ -110,7 +110,6 @@ export class QueryDto {
   @IsString({ each: true })
   searchFields?: string[] = ['username', 'email', 'company', 'category'];
 }
-
 export class SearchDto {
   @IsNotEmpty()
   @IsString()
@@ -118,12 +117,12 @@ export class SearchDto {
 }
 
 export class FilterDto {
-  @ApiProperty({ description: 'Username for real-time user search' })
+  @ApiProperty({required: false , description: 'Username for real-time user search' })
   @IsString()
   @IsOptional()
   username?: string;
 
-  @ApiProperty()
+  @ApiProperty({required: false})
   @IsString()
   @IsOptional()
   search?: string;

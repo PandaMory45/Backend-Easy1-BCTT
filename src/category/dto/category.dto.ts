@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 import { BlogDto } from "src/blog/dto/blog.dto";
 
 
@@ -50,11 +50,12 @@ export class UpdateCategoryDto{
 }
 
 export class FilterCatDto{
-  @ApiProperty()
+  @ApiProperty({ required: false, description: 'User for real-time category search' })
+  @IsString()
   @IsOptional()
   name?: string
 
-  @ApiProperty()
+  @ApiProperty({ required: false, description: 'User for real-time company search' })
   @IsOptional()
-  company?:string
+  search?:string
 }

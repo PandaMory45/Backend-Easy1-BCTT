@@ -2,6 +2,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { CategoryEntity} from "src/category/entities/category.entity";
 import { CompanyEntity } from "src/company/entities/company.entity";
+import { MediaEntity } from "src/media/entities/media.entity";
 import { UserEntity } from "src/user/entities/user.entity";
 import { Entity, PrimaryGeneratedColumn, Column, BeforeUpdate, ManyToOne, ManyToMany } from "typeorm";
 
@@ -52,7 +53,7 @@ export class BlogEntryEntity {
 
     @Column({nullable: true})
     isPublished: boolean;
-
+     
     @ApiProperty()
     @ManyToOne(type => UserEntity, user => user.blogEntries)
     author: UserEntity;
@@ -64,4 +65,8 @@ export class BlogEntryEntity {
     @ApiProperty()
     @ManyToMany(() => CompanyEntity, company => company.blogEntries, {nullable: true, onDelete: 'SET NULL'})
     company: CompanyEntity[];
+
+    @ManyToMany(() => MediaEntity, media => media.blogEntries, {nullable: true, onDelete: 'SET NULL'})
+    media: MediaEntity[]
 }
+

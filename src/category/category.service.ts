@@ -61,27 +61,23 @@ export class CategoryService {
 
   //TÌM CÁCH NGẮN HƠN
   async getCategorys(filterDto: FilterCatDto): Promise<CategoryEntity[]> {
-    const { name, company } = filterDto;
+    const { name, search } = filterDto;
   
-    // Create a query builder for the User entity
     const queryBuilder = this.Repository
-    .createQueryBuilder('category')
-    .leftJoinAndSelect('category.blogEntries','blogEntries');
+      .createQueryBuilder('category')
+      .innerJoinAndSelect('category.blogEntries', 'blogEntries');
   
-    // If username is provided, perform a partial search
     if (name) {
       queryBuilder.andWhere('category.name LIKE :name', { name: `%${name}%` });
     }
   
-    // If search is provided, perform a partial search on multiple columns (e.g., username, name)
-    if (company) {
+    if (search) {
       queryBuilder.andWhere(
-        '(category.name LIKE :company OR category.company LIKE :company OR blogEntries.title LIKE :company)',
-        { company: `%${company}%` },
+        '(category.company LIKE :search OR blogEntries.title LIKE :search)',
+        { search: `%${search}%` },
       );
     }
   
-  // Execute the query and return the results
     const categorys = await queryBuilder.getMany();
     return categorys;
   }

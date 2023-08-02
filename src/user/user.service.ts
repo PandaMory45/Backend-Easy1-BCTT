@@ -80,15 +80,12 @@ export class UserService {
   async getUsers(filterDto: FilterDto): Promise<User[]> {
     const { username, search } = filterDto;
   
-    // Create a query builder for the User entity
     const queryBuilder = this.userRepository.createQueryBuilder('user');
   
-    // If username is provided, perform a partial search
     if (username) {
       queryBuilder.andWhere('user.username LIKE :username', { username: `%${username}%` });
     }
   
-    // If search is provided, perform a partial search on multiple columns (e.g., username, name)
     if (search) {
       queryBuilder.andWhere(
         '(user.username LIKE :search OR user.name LIKE :search)',
@@ -96,7 +93,6 @@ export class UserService {
       );
     }
   
-  // Execute the query and return the results
     const users = await queryBuilder.getMany();
     return users;
   }
