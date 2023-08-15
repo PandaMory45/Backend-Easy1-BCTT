@@ -2,7 +2,9 @@ import { ApiProperty } from "@nestjs/swagger"
 import { Transform } from "class-transformer"
 import { IsArray, IsIn, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator"
 import { BlogDto } from "src/blog/dto/blog.dto"
+import { MediaEntity } from "src/media/entities/media.entity"
 import { Column } from "typeorm"
+import { UserEntity } from "../entities/user.entity"
 
 export class User {
   @ApiProperty()
@@ -33,6 +35,8 @@ export class User {
 
   @ApiProperty()
   blogEntries: BlogDto[];
+
+  // media?: MediaEntity;
 }
 
 export class RegisterUser {
@@ -127,4 +131,8 @@ export class FilterDto {
   @IsOptional()
   search?: string;
 }
-export type RequestUser = Request & { user: User };
+export type RequestUser = Request & { user: UserEntity };
+
+export class UploadAvatar{
+
+}

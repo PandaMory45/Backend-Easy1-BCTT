@@ -25,8 +25,7 @@ export class UserIsAuthor implements CanActivate {
       const userEntity = await this.userService.findOne(user.id);
       const blogEntity = await this.blogService.findOne(blogEntryId)
       console.log(blogEntity)
-      let hasPermission = false;
-
+      let hasPermission = false
        if(userEntity.id === blogEntity.author.id){
         hasPermission = true
        }

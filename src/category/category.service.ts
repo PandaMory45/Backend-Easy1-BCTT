@@ -22,12 +22,6 @@ export class CategoryService {
     return await this.Repository.save(createCategory)
   }
 
-  // async list():Promise<CategoryEntity[]>{
-  //   return this.Repository.find({
-  //     relations: ['blogEntries']
-  //   })
-  // }
-
   async paginateList(options: IPaginationOptions): Promise<Pagination<CategoryEntity>>{
     return paginate<CategoryEntity>(this.Repository, options, {
       relations: ['blogEntries'],

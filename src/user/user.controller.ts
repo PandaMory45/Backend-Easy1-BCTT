@@ -1,9 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors, ValidationPipe } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ChangePasswordDto, FilterDto, QueryDto, RequestUser, SearchDto, User, UserRole, } from './dto/user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from './entities/user.entity';
+import { storageConfig } from 'src/helpers/config';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Pagination } from 'nestjs-typeorm-paginate';
 // import { hasRole } from '';
 
 @ApiBearerAuth()
@@ -56,5 +59,14 @@ export class UserController {
     const user = req.user;
       await this.userService.ChangePassword(user, changePasswordDto)
   }
+  @Post('avatar')
+  @UseInterceptors(FileInterceptor('images', { storage: storageConfig('images') }))
+  async UploadAvatar(@Req() req: RequestUser, @UploadedFile() file: Express.Multer.File):Promise<UserEntity| undefined>{
+    const user = req.user.id;
+    const avataPart = file.filename;
+    return this.userService.UploadAvar(user, avataPart)
+  }
+
   
+  // }
 }

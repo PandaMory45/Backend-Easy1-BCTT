@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { BlogDto } from "src/blog/dto/blog.dto";
 
 
@@ -7,7 +7,7 @@ export class CreateCategoryDto
 {
   // stt?: number;
   @ApiProperty({ example: 'sự kiện' })
-  @IsOptional()
+  @IsNotEmpty()
   name?: string;
 
   @ApiProperty()
@@ -15,11 +15,11 @@ export class CreateCategoryDto
   slug?: string;
 
   @ApiProperty({ example: 'sự kiện' })
-  @IsOptional()
+  @IsNotEmpty()
   description?: string;
 
   @ApiProperty({ example: 'tinasoft' })
-  @IsOptional()
+  @IsNotEmpty()
   company?: string;
 
   @ApiProperty()
@@ -40,9 +40,6 @@ export class UpdateCategoryDto{
   @ApiProperty({ example: 'tinasoft' })
   @IsOptional()
   company?: string;
-
-  @ApiProperty()
-  @IsOptional()
 
   @ApiProperty()
   @IsOptional()

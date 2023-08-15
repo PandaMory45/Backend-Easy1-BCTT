@@ -10,12 +10,16 @@ export class MediaEntity{
   @Column()
   title: string
 
+  @Column({ type: 'bytea' })
+  data: string;
+
   @ManyToOne(() => UserEntity, user => user.media, {nullable: true, onDelete: 'SET NULL'})
   user: UserEntity;
 
   @ManyToMany(() => BlogEntryEntity, blogEntries => blogEntries.media, {nullable: true, onDelete: 'SET NULL'})
   blogEntries: BlogEntryEntity[];
 
+  @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
   createAt:Date;
 
 

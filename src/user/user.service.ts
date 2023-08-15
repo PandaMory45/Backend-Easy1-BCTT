@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { ChangePasswordDto, FilterDto, QueryDto, User, UserRole } from './dto/user.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { join } from 'path';
+import { identity } from 'rxjs';
+import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 
 
 @Injectable()
@@ -97,4 +99,45 @@ export class UserService {
     return users;
   }
 
+  async UploadAvar(userId: number, avatarPart: string): Promise<UserEntity>{
+    const user = await this.userRepository.findOne({where: {id: userId}});
+
+    if(!user){
+      return undefined;
+    }
+
+    user.avatar = avatarPart;
+    return this.userRepository.save(user)
+  }
+
+  async paginateFilterByUsername(options: IPaginationOptions, user: User): Promise<Pagination<User>> {
+    const [users, totalUsers] = await this.userRepository.findAndCount({
+        skip: Number(options.page) * Number(options.limit) || 0,
+        take: Number(options.limit) || 10,
+        order: { id: "ASC" },
+        select: ['id', 'name', 'username', 'email', 'role'],
+        where: [
+            { username: Like(`%${user.username}%`) }
+        ]
+    });
+
+    const usersPageable: Pagination<User> = {
+        items: users,
+        links: {
+            first: options.route + `?limit=${options.limit}`,
+            previous: options.route + ``,
+            next: options.route + `?limit=${options.limit}&page=${Number(options.page) + 1}`,
+            last: options.route + `?limit=${options.limit}&page=${Math.ceil(totalUsers / Number(options.limit))}`
+        },
+        meta: {
+            currentPage: Number(options.page),
+            itemCount: users.length,
+            itemsPerPage: Number(options.limit),
+            totalItems: totalUsers,
+            totalPages: Math.ceil(totalUsers / Number(options.limit))
+        }
+    };
+
+    return usersPageable;
+}
 }
