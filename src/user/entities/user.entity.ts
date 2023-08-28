@@ -1,17 +1,18 @@
-import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import * as bcrypt from 'bcrypt';
 import { User, UserRole } from "../dto/user.dto";
 import { BlogDto } from "src/blog/dto/blog.dto";
 import { BlogEntryEntity } from "src/blog/entites/blog.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { MediaEntity } from "src/media/entities/media.entity";
+import { Exclude } from "class-transformer";
 
 @Entity()
 export class UserEntity{
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column()//////////
   name: string;
 
   @Column({unique: true})
@@ -21,25 +22,29 @@ export class UserEntity{
   @Column({type: 'enum', enum: UserRole, default: UserRole.USER})
   role: UserRole;
 
-  @Column()
+  @Column()////////////
   email: string;
 
-  @Column({ nullable: true, default: null })
-  avatar: string;
-
   @Column({ select: false })
+  @Exclude()////////exclude                             
   password: string
 
   @ApiProperty()
   @OneToMany(type => BlogEntryEntity, blogEntryEntity => blogEntryEntity.author)
   blogEntries: BlogEntryEntity[];
   
-  @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
+  @CreateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
   createdAt: Date;
 
-  @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
+  @UpdateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
   updatedAt: Date;  
   
+  @Column({ type: 'varchar' , nullable: true})
+  avatarT: string;
+
+  @OneToOne(() => MediaEntity, media => media.user)
+  avatar: MediaEntity;
+
   @OneToMany(() => MediaEntity, media => media.user, {nullable: true, onDelete: 'SET NULL'})
   media: MediaEntity[];
 

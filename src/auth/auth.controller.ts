@@ -21,12 +21,6 @@ export class AuthController {
     return this.authService.createUser(user)
   }
 
-  @Post('register')
-  @ApiOperation({ summary: 'Tạo tài khoản bởi User' })
-  register(@Body() user: RegisterUser): Promise<User> {
-    return this.authService.registerUser(user)
-  }
-
   @Post('login')
   @ApiOperation({ summary: 'Đăng nhập' })
   async login(@Body() loginAuth: LoginAuthDto): Promise<object>{

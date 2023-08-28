@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNumber, IsOptional } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional } from "class-validator";
 import { BlogEntryEntity } from "src/blog/entites/blog.entity";
 import { User } from "src/user/dto/user.dto";
 import { UserEntity } from "src/user/entities/user.entity";
@@ -17,9 +17,11 @@ export class CreateMediaDto{
 
   // blogEntries?: BlogEntryEntity[];
 }
-export class upDateDto{
+export class UpdatePictureDto{
+  @ApiProperty()
+  @IsNotEmpty()
   title?: string;
-  
+
 }
 export class MediaQueryDto {
   @ApiProperty({ required: false, description: 'Page number', example: 1 })
@@ -35,4 +37,8 @@ export class MediaQueryDto {
   @ApiProperty({ required: false, description: 'Title to search'})
   @IsOptional()
   title?: string;
+
+  @ApiProperty({ required: false, description: 'Date Create to search'})
+  @IsOptional()
+  createAt?: Date;
 }

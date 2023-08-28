@@ -134,5 +134,8 @@ export class FilterDto {
 export type RequestUser = Request & { user: UserEntity };
 
 export class UploadAvatar{
-
+  @ApiProperty({required: false})
+  @IsString()
+  @IsOptional()
+  pictureId?: number
 }

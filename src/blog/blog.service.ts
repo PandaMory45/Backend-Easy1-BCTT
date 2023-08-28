@@ -24,7 +24,9 @@ export class BlogService {
     blogDto.author = user;
     const slug = await this.generateSlug(blogDto.title)
     blogDto.slug = slug
-    const category = await this.categoryRepository.findOne({where: {name: blogDto.category.name}});
+    const category = await this.categoryRepository.findOne({
+      where: {name: blogDto.category.name}}
+      );
     if (!category) {
       throw new NotFoundException('Category not found');
     }
@@ -95,7 +97,9 @@ export class BlogService {
 
   //Update Post
   async updateOne(id: number, blog: BlogDto): Promise<BlogDto>{
-    const existingBlog = await this.blogRepository.findOne({where:{id: id}});
+    const existingBlog = await this.blogRepository.findOne({
+      where:{id: id}
+    });
     if (!existingBlog) {
       throw new NotFoundException('Blog not found');
     }
@@ -108,7 +112,23 @@ export class BlogService {
   async deleteOne(id: number): Promise<any>{
     return this.blogRepository.delete(id)
   }
+  //paginate
+  async paginate(options: IPaginationOptions): Promise<Pagination<BlogEntryEntity>> {
+    const queryBuilder = this.blogRepository.createQueryBuilder('blog_entry');
+    return paginate<BlogEntryEntity>(queryBuilder, options);
+  }
 
+  async paginateFilterByTitle(options: IPaginationOptions, title: string): Promise<Pagination<BlogEntryEntity>> {
+    const queryBuilder = this.blogRepository.createQueryBuilder('blog_entry');
+    queryBuilder.where(`blog_entry.title LIKE :title`, { title: `%${title}%` });
+    return paginate<BlogEntryEntity>(queryBuilder, options);
+  }
+
+  async paginateFilterByDate(options: IPaginationOptions, createAt: Date):Promise<Pagination<BlogEntryEntity>>{
+    const queryBuilder = this.blogRepository.createQueryBuilder('blog_entry');
+    queryBuilder.where(`blog_entry.createAt >= :createAt`, { createAt });
+    return paginate<BlogEntryEntity>(queryBuilder, options);
+  }
   generateSlug(title: string): Promise<string>{
     return slugify(title)
   }

@@ -1,6 +1,6 @@
 import { BlogEntryEntity } from "src/blog/entites/blog.entity";
 import { UserEntity } from "src/user/entities/user.entity";
-import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class MediaEntity{
@@ -10,7 +10,7 @@ export class MediaEntity{
   @Column()
   title: string
 
-  @Column({ type: 'bytea' })
+  @Column({ type: 'varchar' })
   data: string;
 
   @ManyToOne(() => UserEntity, user => user.media, {nullable: true, onDelete: 'SET NULL'})
@@ -19,8 +19,11 @@ export class MediaEntity{
   @ManyToMany(() => BlogEntryEntity, blogEntries => blogEntries.media, {nullable: true, onDelete: 'SET NULL'})
   blogEntries: BlogEntryEntity[];
 
-  @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
-  createAt:Date;
+  @CreateDateColumn({type: 'date', default: () => "CURRENT_DATE"})
+  createAt: Date;
+
+  @UpdateDateColumn({type: 'date', default: () => "CURRENT_DATE"})
+  updateAt: Date;
 
 
 }

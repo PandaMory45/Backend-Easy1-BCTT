@@ -4,7 +4,7 @@ import { CategoryEntity} from "src/category/entities/category.entity";
 import { CompanyEntity } from "src/company/entities/company.entity";
 import { MediaEntity } from "src/media/entities/media.entity";
 import { UserEntity } from "src/user/entities/user.entity";
-import { Entity, PrimaryGeneratedColumn, Column, BeforeUpdate, ManyToOne, ManyToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, BeforeUpdate, ManyToOne, ManyToMany, UpdateDateColumn, CreateDateColumn } from "typeorm";
 
 
 
@@ -17,25 +17,26 @@ export class BlogEntryEntity {
     @Column()
     title: string;
 
-    @Column({nullable: true})
+    @Column({nullable: true})/////
     slug: string;
 
-    @Column({default: ''})
+    @Column({default: ''})///////
     description: string;
 
-    @Column({default: ''})
+    @Column({default: ''})///////
     body: string;
 
-    @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
+    @CreateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
     createdAt: Date;
 
-    @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
+    @UpdateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
     updatedAt: Date;    
 
     @BeforeUpdate()
     updateTimestamp() {
         this.updatedAt = new Date;
-    }
+    }////////////
+
     @Column({default: 0})
     views: number;
 
@@ -43,15 +44,15 @@ export class BlogEntryEntity {
     upVote: number;
 
     @Column({default: 0})
-    downvote: number;
+    downVote: number;
  
     @Column({nullable: true})
     headerImage: string;
 
-    @Column({nullable: true})
+    @Column({nullable: true})///////
     publishedDate: Date;
 
-    @Column({nullable: true})
+    @Column({nullable: true})///////
     isPublished: boolean;
      
     @ApiProperty()
@@ -59,7 +60,7 @@ export class BlogEntryEntity {
     author: UserEntity;
 
     @ApiProperty()
-    @ManyToOne(type => CategoryEntity, category => category.blogEntries, {nullable: true, onDelete: 'SET NULL'})
+    @ManyToMany(type => CategoryEntity, category => category.blogEntries)
     category: CategoryEntity
 
     @ApiProperty()

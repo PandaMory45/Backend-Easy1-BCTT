@@ -1,5 +1,5 @@
 import { BlogEntryEntity } from "src/blog/entites/blog.entity";
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 
 @Entity()
@@ -20,13 +20,13 @@ export class CategoryEntity{
   @Column()
   company: string;
 
-  @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
+  @CreateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
   createdAt: Date;
 
-  @Column({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
+  @UpdateDateColumn({type: 'timestamp', default: () => "CURRENT_TIMESTAMP"})
   updatedAt: Date; 
 
-  @OneToMany(type => BlogEntryEntity, blogEntryEntity => blogEntryEntity.category, {nullable: true, onDelete: 'SET NULL'})
+  @ManyToMany(type => BlogEntryEntity, blogEntryEntity => blogEntryEntity.category)
   blogEntries: BlogEntryEntity[]
 
 }

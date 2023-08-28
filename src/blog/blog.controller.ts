@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { BlogDto, FilterBlogDto } from './dto/blog.dto';
+import { BlogDto, FilterBlogDto, QueryPostDto } from './dto/blog.dto';
 import { BlogService } from './blog.service';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { AuthGuard } from '@nestjs/passport';
@@ -7,6 +7,8 @@ import { UserIsAuthor } from './guard/user-is-author.guard';
 import passport from 'passport';
 import { RequestUser } from 'src/user/dto/user.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Pagination } from 'nestjs-typeorm-paginate';
+import { BlogEntryEntity } from './entites/blog.entity';
 
 export const BLOG_URL = 'http://localhost:3000/blog'
 // @ApiBearerAuth()
@@ -75,4 +77,39 @@ export class BlogController {
     return this.blogService.deleteOne(id)
   }
 
+  @Get("paginate")
+  async indexQ(@Query() queryDto: QueryPostDto): Promise<Pagination<BlogEntryEntity>> {
+    const page = queryDto.page || 1;
+    const limit = queryDto.limit || 10;
+
+    if (queryDto.title) {
+      return await this.blogService.paginateFilterByTitle(
+        {
+          page,
+          limit,
+          route: 'http://localhost:3000/blog/paginate',
+        },
+        queryDto.title,
+      );
+    } 
+    if(queryDto.createAt)
+    {
+      return await this.blogService.paginateFilterByDate(
+        {
+        page,
+        limit,
+        route: 'http://localhost:3000/blog/paginate',
+      },
+      queryDto.createAt,
+      );
+    }
+    else{
+      return await this.blogService.paginate(
+        {
+        page,
+        limit,
+        route: 'http://localhost:3000/blog/paginate',
+      })
+    }
+  }
 }

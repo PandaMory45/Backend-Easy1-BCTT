@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseArrayPipe, Post, Put, Query } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { CreateCategoryDto, FilterCatDto, UpdateCategoryDto } from './dto/category.dto';
+import { CreateCategoryDto, FilterCatDto, QueryCatDto, UpdateCategoryDto } from './dto/category.dto';
 import { CategoryEntity } from './entities/category.entity';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Pagination } from 'nestjs-typeorm-paginate';
 
 export const CATEGORY_URL = 'http://localhost:3000/category'
 // @ApiBearerAuth()
@@ -63,5 +64,59 @@ export class CategoryController {
     return this.categoryService.deleteOne(id)
   }
 
-  
+  @Delete('/:idmultiple')
+  deleteMutiple(@Query('ids', new ParseArrayPipe({items: String, separator: ','})) ids: string[]): Promise<any>{
+    return this.categoryService.deleteMutiple(ids)
+  }
+
+  @Get(':id/cout-post')
+  async getPostCountByCate(@Param('id') id : number): Promise<number>{
+    return this.categoryService.getPostCountByCate(id)
+  }
+
+  @Get('/getCat')
+  async index(@Query() queryDto: QueryCatDto): Promise<Pagination<CategoryEntity>> {
+    const page = queryDto.page || 1;
+    const limit = queryDto.limit || 10;
+
+    if (queryDto.name) {
+      return await this.categoryService.paginateFilterByName(
+        {
+          page,
+          limit,
+          route: 'http://localhost:3000/media',
+        },
+        queryDto.name,
+      );
+    }
+    if (queryDto.company) {
+      return await this.categoryService.paginateFilterByCompany(
+        {
+          page,
+          limit,
+          route: 'http://localhost:3000/media',
+        },
+        queryDto.company,
+      );
+    }
+    if(queryDto.createAt)
+    {
+      return await this.categoryService.paginateFilterByDate(
+        {
+        page,
+        limit,
+        route: 'http://localhost:3000/media',
+      },
+      queryDto.createAt,
+      );
+    }
+    else{
+      return await this.categoryService.paginate(
+        {
+        page,
+        limit,
+        route: 'http://localhost:3000/media',
+      })
+    }
+  }
 }

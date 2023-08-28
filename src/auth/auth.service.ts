@@ -44,25 +44,6 @@ export class AuthService {
     }
   }
 
-  async registerUser(user: RegisterUser): Promise<User> {
-    try {
-      user.role = UserRole.USER;
-      const newUser = new UserEntity();
-      newUser.name = user.name;
-      newUser.username = user.username;
-      newUser.email = user.email;
-      newUser.password = await this.hashPassword(user.password);
-      newUser.role = user.role
-      // console.log(newUser.password)
-      const savedUser = await this.userRepository.save(newUser);
-      delete(savedUser.password)
-      // return await this.converToJwtString(user.id, user.email);
-      return savedUser
-    } catch(err) {
-      throw err
-    }
-  }
-
   async findUserByIdAndEmail(id: number, email: string): Promise<UserEntity | null> {
     return this.userRepository.findOne({where:{ id: id, email: email }});
   }
@@ -105,11 +86,11 @@ export class AuthService {
       secret: this.configService.get<string>('SECRET_KEY')
     })
   }
-  async test(): Promise<void>{
-    console.log(process.env.DB_HOST)
-    console.log(parseInt(process.env.DB_PORT, 10))
-    console.log(process.env.DB_USERNAME)
-    console.log(process.env.DB_PASSWORD)
-    console.log(process.env.DB_DATABASE)
-  }
+  // async test(): Promise<void>{
+  //   console.log(process.env.DB_HOST)
+  //   console.log(parseInt(process.env.DB_PORT, 10))
+  //   console.log(process.env.DB_USERNAME)
+  //   console.log(process.env.DB_PASSWORD)
+  //   console.log(process.env.DB_DATABASE)
+  // }
 }

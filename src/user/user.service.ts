@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
-import { ChangePasswordDto, FilterDto, QueryDto, User, UserRole } from './dto/user.dto';
+import { ChangePasswordDto, FilterDto, QueryDto, RegisterUser, UploadAvatar, User, UserRole } from './dto/user.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { join } from 'path';
 import { identity } from 'rxjs';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
+import { MediaEntity } from 'src/media/entities/media.entity';
 
 
 @Injectable()
@@ -14,14 +15,35 @@ export class UserService {
    constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(MediaEntity)
+    private readonly mediaRepo: Repository<MediaEntity>,
     private readonly authService: AuthService,
+    
    ){}
   
-
+   async registerUser(user: RegisterUser): Promise<User> {
+    try {
+      user.role = UserRole.USER;
+      const newUser = new UserEntity();
+      newUser.name = user.name;
+      newUser.username = user.username;
+      newUser.email = user.email;
+      newUser.password = await this.authService.hashPassword(user.password);
+      newUser.role = user.role
+      // console.log(newUser.password)
+      const savedUser = await this.userRepository.save(newUser);
+      delete(savedUser.password)
+      // return await this.converToJwtString(user.id, user.email);
+      return savedUser
+    } catch(err) {
+      throw err
+    }
+  }
+  
   async findOne(id: number): Promise<User> {
     const user =  await this.userRepository.findOne({
       where:{id: id},
-      relations: ['blogEntries']
+      relations: ['blogEntries', 'media', 'avatar']
     })
     const {password, ...result} = user
     return result;
@@ -99,15 +121,22 @@ export class UserService {
     return users;
   }
 
-  async UploadAvar(userId: number, avatarPart: string): Promise<UserEntity>{
-    const user = await this.userRepository.findOne({where: {id: userId}});
-
-    if(!user){
-      return undefined;
+  async set(user: UserEntity, uplaodAva: UploadAvatar): Promise<UserEntity> {
+    if (!user) {
+      throw new BadRequestException('User not found');
     }
-
-    user.avatar = avatarPart;
-    return this.userRepository.save(user)
+  
+    const picture = await this.mediaRepo.findOne({ where: { id: uplaodAva.pictureId } });
+  
+    if (!picture) {
+      throw new BadRequestException('Picture not found');
+    }
+  
+    user.avatar = picture;
+    
+    const updatedUser = await this.userRepository.save(user); // Lưu user để cập nhật avatar
+    
+    return updatedUser;
   }
 
   async paginateFilterByUsername(options: IPaginationOptions, user: User): Promise<Pagination<User>> {
@@ -140,4 +169,17 @@ export class UserService {
 
     return usersPageable;
 }
+
+//Upload Avatar for User
+async updateAvatar(user: UserEntity, imageId: UploadAvatar): Promise<UserEntity> {
+  if (!user) {
+    throw new BadRequestException('User not found');
+  }
+  const media =  await this.mediaRepo.findOne({
+    where: {id: imageId.pictureId},
+  })
+
+  user.avatarT = media.data;
+  return this.userRepository.save(user);
+  }
 }

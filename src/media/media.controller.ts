@@ -1,13 +1,13 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, ParseArrayPipe, Post, Put, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import path = require('path');
 // import { UploadInterceptor } from './upload.interceptor';
 import { MediaService } from './media.service';
-import { CreateMediaDto, MediaQueryDto } from './dto/media.dto';
+import { CreateMediaDto, MediaQueryDto, UpdatePictureDto } from './dto/media.dto';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
-import { RequestUser } from 'src/user/dto/user.dto';
+import { QueryDto, RequestUser } from 'src/user/dto/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storageConfig } from 'src/helpers/config';
-import {Response} from 'express';
+import {Response, query} from 'express';
 import {Request} from 'express';
 import {extname}  from 'path';
 import { Pagination } from 'nestjs-typeorm-paginate';
@@ -31,12 +31,6 @@ export class MediaController {
         req.fileValidationError = `Wrong extention type. Accepted file ext are: ${allowedExtArr.toString()}`;
         cb(null, false)
     }
-      // const fileSize = parseInt(req.headers[`content-length`]);
-      // if(fileSize > 1024 * 1024 * 5){
-
-      //   cb(null, false);
-      // }
-      // else{
         cb(null, true);
       // }
     }
@@ -62,6 +56,12 @@ export class MediaController {
   deleteImage(@Param('id') id: number): Promise<any>{
     return this.mediaService.deleteOne(id)
   }
+
+  @Delete(':id/multiple')
+  deleteMutiple(@Query('ids', new ParseArrayPipe({items: String, separator: ','})) ids: string[]): Promise<any>{
+    return this.mediaService.deleteMutiple(ids)
+  }
+
   @Get()
   async index(@Query() queryDto: MediaQueryDto): Promise<Pagination<MediaEntity>> {
     const page = queryDto.page || 1;
@@ -76,12 +76,30 @@ export class MediaController {
         },
         queryDto.title,
       );
-    } else {
-      return await this.mediaService.paginate({
+    } 
+    if(queryDto.createAt)
+    {
+      return await this.mediaService.paginateFilterByDate(
+        {
         page,
         limit,
         route: 'http://localhost:3000/media',
-      });
+      },
+      queryDto.createAt,
+      );
     }
+    else{
+      return await this.mediaService.paginate(
+        {
+        page,
+        limit,
+        route: 'http://localhost:3000/media',
+      })
+    }
+  }
+
+  @Put('/:id')
+  async updateOne(@Param('id') id: number, @Body() updatePicture: UpdatePictureDto): Promise<MediaEntity>{
+    return this.mediaService.updateOne(Number(id), updatePicture);
   }
 }
