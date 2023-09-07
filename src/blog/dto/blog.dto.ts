@@ -40,6 +40,22 @@ export class BlogDto{
   @IsOptional()
   headerImage?: string;
 }
+export class UpdatePost{
+  @ApiProperty({ example: 'Khai trương' })
+  @IsOptional()
+  @IsString()
+  title: string;
+
+  @ApiProperty({ example: 'Khai trương' })
+  @IsOptional()
+  @IsString()
+  description: string;
+
+  @ApiProperty({ example: 'Khai trương' })
+  @IsOptional()
+  @IsString()
+  body: string;
+}
 
 export class FilterBlogDto{
   @ApiProperty({required: false})

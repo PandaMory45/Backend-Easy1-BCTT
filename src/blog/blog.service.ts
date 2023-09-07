@@ -7,6 +7,9 @@ import { User } from 'src/user/dto/user.dto';
 import { IPaginationOptions, paginate, Pagination } from 'nestjs-typeorm-paginate';
 import { CategoryService } from 'src/category/category.service';
 import { CategoryEntity } from 'src/category/entities/category.entity';
+import { UserEntity } from 'src/user/entities/user.entity';
+import { VoteEntity, VoteType } from 'src/votes/entities/votes.entity';
+import { VotesService } from 'src/votes/votes.service';
 
 const slugify = require('slugify')
 
@@ -16,7 +19,8 @@ export class BlogService {
   constructor(
     @InjectRepository(BlogEntryEntity)  private readonly blogRepository: Repository<BlogEntryEntity>,
     @InjectRepository(CategoryEntity) private readonly categoryRepository: Repository<CategoryEntity>,
-
+    @InjectRepository(VoteEntity) private readonly voteRepository: Repository<VoteEntity>,
+    private readonly voteSevice: VotesService
 
   ){}
 
@@ -38,8 +42,8 @@ export class BlogService {
     return this.blogRepository.find({relations: ['author','category']})
   }
 
-  async findOne(id: number): Promise<BlogDto>{
-    return await this.blogRepository.findOne({where:{id: id}, relations: ['author', 'category'],})
+  async findOne(id: number): Promise<BlogEntryEntity>{
+    return await this.blogRepository.findOne({where:{id: id}})
   }
 
   async getBlogEnties(filter: FilterBlogDto):Promise<BlogEntryEntity[]>{
@@ -97,16 +101,13 @@ export class BlogService {
 
   //Update Post
   async updateOne(id: number, blog: BlogDto): Promise<BlogDto>{
-    const existingBlog = await this.blogRepository.findOne({
-      where:{id: id}
-    });
+    const existingBlog = await this.findOne(id)
     if (!existingBlog) {
       throw new NotFoundException('Blog not found');
     }
-  
-    await this.blogRepository.update(id, blog)
 
-    return this.findOne(id)
+    await this.blogRepository.update(id, blog)
+    return this.findOne(id) 
   }
   //Delete Post
   async deleteOne(id: number): Promise<any>{
@@ -129,6 +130,46 @@ export class BlogService {
     queryBuilder.where(`blog_entry.createAt >= :createAt`, { createAt });
     return paginate<BlogEntryEntity>(queryBuilder, options);
   }
+
+  async upvotePost(userLike: UserEntity, postId: number): Promise<BlogEntryEntity> {
+    const post = await this.blogRepository.findOne({
+      where: {id: postId},
+      relations: ['votes', 'votes.user']
+    });
+    if (!post) {
+        throw new NotFoundException('Post not found');
+    }
+    // const ex = post.votes.find(votes => votes.user.id)
+    // console.log(ex)
+    console.log(post)
+    const existingVote = post.votes.find(votes => votes.user.id === userLike.id);
+    if (existingVote) {
+        // Cancel vote if already upvoted
+        if (existingVote.typeVote === VoteType.Upvote) {
+            post.upVote--;
+            await this.voteRepository.remove(existingVote);
+        }
+    } else {
+      post.upVote++;
+
+      const newVote = new VoteEntity();
+      newVote.user = userLike;
+      newVote.typeVote = VoteType.Upvote;
+  
+      // Save the new vote entity
+      const savedVote = await this.voteRepository.save(newVote);
+  
+      // Establish the relationship between post and savedVote
+      post.votes.push(savedVote);
+  
+      // Save the updated post
+      await this.blogRepository.save(post);
+      
+    }
+    
+    return post;
+  }
+
   generateSlug(title: string): Promise<string>{
     return slugify(title)
   }

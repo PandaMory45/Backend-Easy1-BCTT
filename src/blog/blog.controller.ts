@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { BlogDto, FilterBlogDto, QueryPostDto } from './dto/blog.dto';
+import { BlogDto, FilterBlogDto, QueryPostDto, UpdatePost } from './dto/blog.dto';
 import { BlogService } from './blog.service';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { AuthGuard } from '@nestjs/passport';
@@ -9,10 +9,11 @@ import { RequestUser } from 'src/user/dto/user.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { BlogEntryEntity } from './entites/blog.entity';
+import { identity } from 'rxjs';
 
 export const BLOG_URL = 'http://localhost:3000/blog'
-// @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Blog')
 @Controller('blog')
 export class BlogController {
@@ -65,8 +66,9 @@ export class BlogController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a Post' })
-  @UseGuards(UserIsAuthor)
-  updateOne(@Param('id') id: number, @Body() blog: BlogDto): Promise<BlogDto>{
+  // @UseGuards(UserIsAuthor)
+  updateOne(@Param('id') id: number, @Body() blog: UpdatePost): Promise<BlogDto>{
+
     return this.blogService.updateOne(Number(id), blog)
   }
 
@@ -78,6 +80,7 @@ export class BlogController {
   }
 
   @Get("paginate")
+  @ApiOperation({ summary: 'Get all Post' })
   async indexQ(@Query() queryDto: QueryPostDto): Promise<Pagination<BlogEntryEntity>> {
     const page = queryDto.page || 1;
     const limit = queryDto.limit || 10;
@@ -111,5 +114,11 @@ export class BlogController {
         route: 'http://localhost:3000/blog/paginate',
       })
     }
+  }
+  
+  @Post(':id')
+  async upvote(@Req() req: RequestUser, @Param('id') postId: number):Promise<BlogEntryEntity>{
+    const user = req.user;
+    return this.blogService.upvotePost(user, postId);
   }
 }

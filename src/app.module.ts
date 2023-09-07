@@ -13,6 +13,7 @@ import { BlogModule } from './blog/blog.module';
 import { CategoryModule } from './category/category.module';
 import { CompanyModule } from './company/company.module';
 import { MediaModule } from './media/media.module';
+import { VotesModule } from './votes/votes.module';
 
 
 @Module({
@@ -38,7 +39,7 @@ import { MediaModule } from './media/media.module';
       isGlobal: true,
     }),
     UserModule, 
-    AuthModule, BlogModule, CategoryModule, CompanyModule, MediaModule 
+    AuthModule, BlogModule, CategoryModule, CompanyModule, MediaModule, VotesModule 
   ],
   controllers: [AppController,],
   providers: [AppService],

@@ -42,25 +42,30 @@ export class MediaService {
       relations: ['user']
     })
   }
+
   //Delete Multiple
   async deleteMutiple(ids: string[]):Promise<DeleteResult>{
     return await this.mediaRepository.delete({id: In(ids)});
   }
+
   //Delete Sigle
   async deleteOne(id: number): Promise<any>{
     return this.mediaRepository.delete(id);
   }
+
   //Lấy tất cả hình ảnh
   async paginate(options: IPaginationOptions): Promise<Pagination<MediaEntity>> {
     const queryBuilder = this.mediaRepository.createQueryBuilder('media');
     return paginate<MediaEntity>(queryBuilder, options);
   }
+
   //Lấy những hình ảnh có các kí tự giống ở phần "title" giống với Input
   async paginateFilterByTitle(options: IPaginationOptions, title: string): Promise<Pagination<MediaEntity>> {
     const queryBuilder = this.mediaRepository.createQueryBuilder('media');
     queryBuilder.where(`media.title LIKE :title`, { title: `%${title}%` });
     return paginate<MediaEntity>(queryBuilder, options);
   }
+  
   //Lấy những hình ảnh được tạo vào móco thời gian được chỉ định
   async paginateFilterByDate(options: IPaginationOptions, createAt: Date):Promise<Pagination<MediaEntity>>{
     const queryBuilder = this.mediaRepository.createQueryBuilder('media');

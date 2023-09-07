@@ -1,10 +1,12 @@
 // import { ApiProperty } from "@nestjs/swagger";
 import { ApiProperty } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
 import { CategoryEntity} from "src/category/entities/category.entity";
 import { CompanyEntity } from "src/company/entities/company.entity";
 import { MediaEntity } from "src/media/entities/media.entity";
 import { UserEntity } from "src/user/entities/user.entity";
-import { Entity, PrimaryGeneratedColumn, Column, BeforeUpdate, ManyToOne, ManyToMany, UpdateDateColumn, CreateDateColumn } from "typeorm";
+import { VoteEntity } from "src/votes/entities/votes.entity";
+import { Entity, PrimaryGeneratedColumn, Column, BeforeUpdate, ManyToOne, ManyToMany, UpdateDateColumn, CreateDateColumn, OneToMany } from "typeorm";
 
 
 
@@ -45,7 +47,11 @@ export class BlogEntryEntity {
 
     @Column({default: 0})
     downVote: number;
- 
+    
+    @ApiProperty()
+    @OneToMany( () => VoteEntity, vote => vote.post)
+    votes: VoteEntity[];
+
     @Column({nullable: true})
     headerImage: string;
 

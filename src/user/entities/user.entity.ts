@@ -6,6 +6,7 @@ import { BlogEntryEntity } from "src/blog/entites/blog.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { MediaEntity } from "src/media/entities/media.entity";
 import { Exclude } from "class-transformer";
+import { VoteEntity } from "src/votes/entities/votes.entity";
 
 @Entity()
 export class UserEntity{
@@ -47,6 +48,10 @@ export class UserEntity{
 
   @OneToMany(() => MediaEntity, media => media.user, {nullable: true, onDelete: 'SET NULL'})
   media: MediaEntity[];
+
+  @OneToMany(()  => VoteEntity, votes => votes.user)
+  @Exclude()
+  votes: VoteEntity[];
 
   @BeforeInsert()
   emaiToLowerCase(){
